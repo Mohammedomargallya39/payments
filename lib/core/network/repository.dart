@@ -4,25 +4,50 @@ import 'package:flutter/material.dart';
 import 'package:payments/core/network/remote/api_endpoints.dart';
 import 'package:payments/core/network/remote/dio_helper.dart';
 import '../error/exceptions.dart';
+import '../models/get_token_model.dart';
+import '../models/make_order_model.dart';
 import '../models/payment_model.dart';
-import '../models/payment_token_model.dart';
 import 'local/cache_helper.dart';
 
 abstract class Repository {
+  /// checkout
+  // Future<Either<String, PaymentTokenModel>> getToken(
+  // {
+  //   required String publicKey,
+  //   required String cardNum,
+  //   required String expiryMonth,
+  //   required String expiryYear,
+  // });
+  //
+  // Future<Either<String, PaymentModel>> makePayment(
+  //     {
+  //       required String token,
+  //       required String secretKey,
+  //       required int amount,
+  //     });
 
-  Future<Either<String, PaymentTokenModel>> getToken(
+  /// paymob
+  Future<Either<String, GetTokenModel>> getToken(
   {
-    required String publicKey,
-    required String cardNum,
-    required String expiryMonth,
-    required String expiryYear,
+    required String key,
   });
+
+  Future<Either<String, MakeOrderModel>> makeOrder(
+      {
+        required String token,
+        required String amount,
+        required String currency,
+        required bool delivery,
+        required List items,
+      });
 
   Future<Either<String, PaymentModel>> makePayment(
       {
         required String token,
-        required String secretKey,
-        required int amount,
+        required String amount,
+        required String orderId,
+        required String currency,
+        required int integrationId,
       });
 
 }
@@ -36,72 +61,168 @@ class RepoImplementation extends Repository {
     required this.cacheHelper,
   });
 
+
+/// checkout
+
+  // @override
+  // Future<Either<String, PaymentTokenModel>> getToken(
+  //     {
+  //         required String publicKey,
+  //         required String cardNum,
+  //         required String expiryMonth,
+  //         required String expiryYear,
+  //
+  //
+  //     }) async
+  // { return _basicErrorHandling<PaymentTokenModel>(
+  //     onSuccess: () async
+  //     {
+  //       final Response f = await dioHelper.post(
+  //           url: getPaymentTokenUrl,
+  //           data:
+  //           {
+  //             'type': 'card',
+  //             'number': cardNum,
+  //             'expiry_month': expiryMonth,
+  //             'expiry_year': expiryYear,
+  //
+  //
+  //           },
+  //           headers: {
+  //             'Content-Type':'Application/json',
+  //             'Authorization':publicKey
+  //             } ,
+  //     );
+  //       return PaymentTokenModel.fromJson(f.data);
+  //       },
+  //     onServerError: (exception) async
+  //     {
+  //       debugPrint(exception.message);
+  //       return exception.message;
+  //     }
+  // );
+  //
+  // }
+  //
+  //
+  // @override
+  // Future<Either<String, PaymentModel>> makePayment(
+  //     {
+  //       required String token,
+  //       required String secretKey,
+  //       required int amount,
+  //     }) async
+  // { return _basicErrorHandling<PaymentModel>(
+  //     onSuccess: () async
+  //     {
+  //       final Response f = await dioHelper.post(
+  //         url: makePaymentUrl,
+  //         data:
+  //         {
+  //           'source' : {
+  //             'type' : 'token',
+  //             'token': token,
+  //         },
+  //           'amount' : amount,
+  //           'currency': 'EGP',
+  //         },
+  //         headers: {
+  //           'Content-Type':'application/json',
+  //           'Authorization': secretKey,
+  //         } ,
+  //       );
+  //       return PaymentModel.fromJson(f.data);
+  //     },
+  //     onServerError: (exception) async
+  //     {
+  //       debugPrint(exception.message);
+  //       return exception.message;
+  //     }
+  // );
+  //
+  // }
+
+/// paymob
+
+@override
+  Future<Either<String, GetTokenModel>> getToken(
+    {
+        required String key,
+    }) async
+{ return _basicErrorHandling<GetTokenModel>(
+    onSuccess: () async
+    {
+      final Response f = await dioHelper.post(
+          url: getTokenUrl,
+          data:
+          {
+            'api_key': key,
+          },
+    );
+      return GetTokenModel.fromJson(f.data);
+      },
+    onServerError: (exception) async
+    {
+      debugPrint(exception.message);
+      return exception.message;
+    }
+);
+}
   @override
-  Future<Either<String, PaymentTokenModel>> getToken(
+  Future<Either<String, MakeOrderModel>> makeOrder(
       {
-          required String publicKey,
-          required String cardNum,
-          required String expiryMonth,
-          required String expiryYear,
-
-
+        required String token,
+        required String amount,
+        required String currency,
+        required bool delivery,
+        required List items,
       }) async
-  { return _basicErrorHandling<PaymentTokenModel>(
+  { return _basicErrorHandling<MakeOrderModel>(
       onSuccess: () async
       {
         final Response f = await dioHelper.post(
-            url: getPaymentTokenUrl,
-            data:
-            {
-              'type': 'card',
-              'number': cardNum,
-              'expiry_month': expiryMonth,
-              'expiry_year': expiryYear,
-
-
-            },
-            headers: {
-              'Content-Type':'Application/json',
-              'Authorization':publicKey
-              } ,
-      );
-        return PaymentTokenModel.fromJson(f.data);
-        },
+          url: makeOrderUrl,
+          data:
+          {
+            'auth_token': token,
+            'amount_cents': amount,
+            'currency': currency,
+            'delivery_needed': delivery,
+            'items': items,
+          },
+        );
+        return MakeOrderModel.fromJson(f.data);
+      },
       onServerError: (exception) async
       {
         debugPrint(exception.message);
         return exception.message;
       }
   );
-
   }
-
 
   @override
   Future<Either<String, PaymentModel>> makePayment(
       {
         required String token,
-        required String secretKey,
-        required int amount,
+        required String amount,
+        required String orderId,
+        required String currency,
+        required int integrationId,
       }) async
   { return _basicErrorHandling<PaymentModel>(
       onSuccess: () async
       {
         final Response f = await dioHelper.post(
-          url: makePaymentUrl,
+          url: makePayRequestUrl,
           data:
           {
-            'source' : {
-              'type' : 'token',
-              'token': token,
+          'auth_token': token,
+          'amount_cents': amount,
+          'order_id': orderId,
+          'currency': currency,
+          'integration_id': integrationId,
           },
-            'amount' : amount,
-            'currency': 'EGP',
-          },
-          headers: {
-            'Content-Type':'Application/json',
-            'Authorization': secretKey,
-          } ,
         );
         return PaymentModel.fromJson(f.data);
       },
@@ -111,7 +232,6 @@ class RepoImplementation extends Repository {
         return exception.message;
       }
   );
-
   }
 
 

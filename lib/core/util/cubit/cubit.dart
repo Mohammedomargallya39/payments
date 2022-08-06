@@ -4,11 +4,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hexcolor/hexcolor.dart';
-import 'package:payments/core/models/payment_card_model.dart';
+import 'package:payments/core/network/remote/api_endpoints.dart';
 import 'package:payments/core/util/cubit/state.dart';
 import '../../di/injection.dart';
+import '../../models/get_token_model.dart';
+import '../../models/make_order_model.dart';
 import '../../models/payment_model.dart';
-import '../../models/payment_token_model.dart';
 import '../../network/local/cache_helper.dart';
 import '../../network/repository.dart';
 import '../constants.dart';
@@ -257,8 +258,10 @@ class AppCubit extends Cubit<AppState> {
 
   /// payments
 
-  String publicKey = 'pk_sbox_tamtzj3whqf7onfnvy6i7vupja2';
-  String privateKey = 'sk_sbox_is3aowbnj5inuejvwakktqscq4i';
+
+/// checkout
+  // String publicKey = 'pk_sbox_tamtzj3whqf7onfnvy6i7vupja2';
+  // String privateKey = 'sk_sbox_is3aowbnj5inuejvwakktqscq4i';
 
   // getPaymentToken(PaymentCardModel card)
   // async{
@@ -268,60 +271,63 @@ class AppCubit extends Cubit<AppState> {
   // }
 
 
-  PaymentTokenModel? paymentTokenModel;
-
-  void getPaymentToken() async
-  {
-    emit(LoadingGetPaymentTokenState());
-    final paymentToken = await _repository.getToken(
-        publicKey: publicKey,
-        cardNum: '4242424242424242',
-        expiryMonth: '12',
-        expiryYear: '2024',
-    );
-
-    paymentToken.fold(
-        (failure)
-        {
-          emit(ErrorGetPaymentTokenState());
-          debugPrint(failure.toString());
-        },
-        (data)
-        {
-          paymentTokenModel = data;
-          emit(SuccessGetPaymentTokenState());
-          payment();
-        }
-
-    );
-
-  }
-
-  PaymentModel? paymentModel;
-
-  void payment() async{
-    emit(LoadingMakePaymentState());
-    final payment = await _repository.makePayment(
-        token: paymentTokenModel!.token!,
-        secretKey: privateKey,
-        amount: 5000,
-    );
-
-    payment.fold(
-            (failure)
-        {
-          emit(ErrorMakePaymentState());
-          debugPrint(failure.toString());
-        },
-            (data)
-        {
-          paymentModel = data;
-          emit(SuccessMakePaymentState());
-        }
-
-    );
-
-  }
+  // PaymentTokenModel? paymentTokenModel;
+  //
+  // void getPaymentToken() async
+  // {
+  //   emit(LoadingGetPaymentTokenState());
+  //   final paymentToken = await _repository.getToken(
+  //       publicKey: publicKey,
+  //       cardNum: '4242424242424242',
+  //       expiryMonth: '12',
+  //       expiryYear: '2024',
+  //   );
+  //
+  //   paymentToken.fold(
+  //       (failure)
+  //       {
+  //         emit(ErrorGetPaymentTokenState());
+  //         debugPrint(failure.toString());
+  //       },
+  //       (data)
+  //       {
+  //         paymentTokenModel = data;
+  //         emit(SuccessGetPaymentTokenState());
+  //         payment(
+  //             token: paymentTokenModel!.token!);
+  //       }
+  //
+  //   );
+  //
+  // }
+  //
+  // PaymentModel? paymentModel;
+  //
+  // void payment({
+  //   required String token
+  // }) async{
+  //   emit(LoadingMakePaymentState());
+  //   final payment = await _repository.makePayment(
+  //       token: token,
+  //       secretKey: privateKey,
+  //       amount: 5000,
+  //   );
+  //
+  //   payment.fold(
+  //           (failure)
+  //       {
+  //         emit(ErrorMakePaymentState());
+  //         debugPrint(failure.toString());
+  //       },
+  //           (data)
+  //       {
+  //         paymentModel = data;
+  //         emit(SuccessMakePaymentState());
+  //       }
+  //
+  //   );
+  //
+  // }
 
 
 // void makePayment(PaymentCardModel card, int amount)
@@ -329,4 +335,89 @@ class AppCubit extends Cubit<AppState> {
   // String token = await getPaymentToken(card);
   //
   // }
+
+/// paymob
+
+  GetTokenModel? getTokenModel;
+
+  void getToken() async
+  {
+    emit(LoadingGetTokenState());
+    final getToken = await _repository.getToken(
+        key: apiKey
+    );
+
+    getToken.fold(
+        (failure)
+        {
+          emit(ErrorGetTokenState());
+          debugPrintFullText(failure.toString());
+        },
+        (data)
+        {
+          getTokenModel = data;
+          emit(SuccessGetTokenState());
+          makeOrder();
+        }
+    );
+
+  }
+
+  MakeOrderModel? makeOrderModel;
+
+  void makeOrder() async
+  {
+    emit(LoadingOrderState());
+    final makeOrder = await _repository.makeOrder(
+        token: getTokenModel!.token!,
+        amount: '10000',
+        currency: 'EGP',
+        delivery: false,
+        items: [],
+    );
+    makeOrder.fold(
+            (failure)
+        {
+          emit(ErrorOrderState());
+          debugPrintFullText(failure.toString());
+        },
+            (data)
+        {
+          makeOrderModel = data;
+          emit(SuccessOrderState());
+          makePayment();
+        }
+    );
+
+  }
+
+  PaymentModel? paymentModel;
+
+  void makePayment() async
+  {
+    emit(LoadingPaymentState());
+    final payment = await _repository.makePayment(
+      token: getTokenModel!.token!,
+      amount: '10000',
+      currency: 'EGP',
+      orderId: '${makeOrderModel!.id}',
+      integrationId: integrationId,
+    );
+    payment.fold(
+            (failure)
+        {
+          emit(ErrorPaymentState());
+          debugPrintFullText(failure.toString());
+        },
+            (data)
+        {
+          paymentModel = data;
+          emit(SuccessPaymentState());
+        }
+    );
+
+  }
+
+
+
 }

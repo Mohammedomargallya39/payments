@@ -645,12 +645,3 @@ final List<SelectGovernmentModel> cities = [
 
 ];
 
-double? currentLat;
-double? currentLng;
-
-
-double? latLocationSearch = currentLat;
-double? lngLocationSearch = currentLng;
-
-String? startLocation;
-
