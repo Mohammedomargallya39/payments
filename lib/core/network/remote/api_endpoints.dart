@@ -1,8 +1,16 @@
-const String baseUrl = 'https://api.sandbox.checkout.com/';
+const String baseUrl = 'https://accept.paymob.com/api/';
 
-const String getPaymentTokenUrl = 'tokens';
+const String getTokenUrl = 'auth/tokens';
 
-const String makePaymentUrl = 'payments';
+const String makeOrderUrl = 'ecommerce/orders';
+
+const String makePayRequestUrl = 'acceptance/payment_keys';
+
+const String apiKey = 'ZXlKaGJHY2lPaUpJVXpVeE1pSXNJblI1Y0NJNklrcFhWQ0o5LmV5SnVZVzFsSWpvaWFXNXBkR2xoYkNJc0ltTnNZWE56SWpvaVRXVnlZMmhoYm5RaUxDSndjbTltYVd4bFgzQnJJam95TlRBM05EbDkuSGRXZGdVOEpJTVdvVTVwd0ppYm9PYnZ0Sm9jTjlRN3RMc2hRSVZIWUt1dW5zdHBiSXd1aFFnOFQxalF0RzRESHZfc3FTNlRPSDA3MV9fYWxERlJFNnc=';
+
+const int integrationId = 2468464;
+
+const String iFrameUrl = 'https://accept.paymob.com/api/acceptance/iframes/437225?payment_token=';
 
 
 //

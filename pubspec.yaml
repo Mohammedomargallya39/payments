@@ -60,6 +60,7 @@ dependencies:
   image_picker: ^0.8.5+3
   restart_app: ^1.1.0
   data_connection_checker_nulls: ^0.0.2
+  webview_flutter: ^3.0.4
 
 dev_dependencies:
   flutter_test:

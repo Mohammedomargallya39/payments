@@ -21,20 +21,36 @@ class LanguageLoaded extends AppState {}
 
 class ChangeLoaded extends AppState {}
 
-class LoadingGetPaymentTokenState extends AppState {}
+// class LoadingGetPaymentTokenState extends AppState {}
+//
+// class SuccessGetPaymentTokenState extends AppState {}
+//
+// class ErrorGetPaymentTokenState extends AppState {}
+//
+// class LoadingMakePaymentState extends AppState {}
+//
+// class SuccessMakePaymentState extends AppState {}
+//
+// class ErrorMakePaymentState extends AppState {}
 
-class SuccessGetPaymentTokenState extends AppState {}
 
-class ErrorGetPaymentTokenState extends AppState {}
+class LoadingGetTokenState extends AppState {}
 
-class LoadingMakePaymentState extends AppState {}
+class ErrorGetTokenState extends AppState {}
 
-class SuccessMakePaymentState extends AppState {}
+class SuccessGetTokenState extends AppState {}
 
-class ErrorMakePaymentState extends AppState {}
+class LoadingOrderState extends AppState {}
 
+class ErrorOrderState extends AppState {}
 
+class SuccessOrderState extends AppState {}
 
+class LoadingPaymentState extends AppState {}
+
+class ErrorPaymentState extends AppState {}
+
+class SuccessPaymentState extends AppState {}
 
 
 
